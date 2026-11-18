@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accounts &amp; Usage | NutriAI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Outfit', sans-serif;
+            background:
+                radial-gradient(circle at 85% 10%, rgba(149, 213, 91, 0.10), transparent 28%),
+                radial-gradient(circle at 10% 90%, rgba(68, 140, 83, 0.10), transparent 30%),
+                #061a12;
+            color: #f2f7f2;
+            min-height: 100vh;
+        }
+        .main {
+            margin-left: 255px;
+            min-height: 100vh;
+            padding: 38px 45px 60px;
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .topbar h1 {
+            font-size: 31px;
+            font-weight: 700;
+            letter-spacing: -0.8px;
+            color: #f2f7f2;
+            margin-bottom: 7px;
+        }
+        .topbar p { color: #93ab9d; font-size: 14px; }
+        .topbar-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .search-form input {
+            width: 280px;
+            max-width: 100%;
+            height: 44px;
+            padding: 0 15px;
+            border-radius: 12px;
+            border: 1px solid rgba(149, 213, 91, 0.22);
+            background: rgba(3, 19, 12, 0.72);
+            color: #f2f7f2;
+            font-family: inherit;
+            font-size: 13px;
+            outline: none;
+        }
+        .search-form input:focus { border-color: #95d55b; }
+        .profile-link-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 44px;
+            padding: 0 16px;
+            border-radius: 12px;
+            background: rgba(149, 213, 91, 0.14);
+            border: 1px solid rgba(149, 213, 91, 0.28);
+            color: #b9ed86;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .you-pill {
+            display: inline-block;
+            padding: 2px 7px;
+            border-radius: 6px;
+            background: rgba(155, 231, 101, 0.18);
+            border: 1px solid rgba(155, 231, 101, 0.35);
+            color: #b8ef82;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            margin-left: 6px;
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+        .card {
+            padding: 23px;
+            min-height: 130px;
+            border-radius: 19px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
+            border: 1px solid rgba(149, 213, 91, 0.12);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.18);
+        }
+        .card h3 { color: #a6beb0; font-size: 13px; font-weight: 500; margin-bottom: 14px; }
+        .card h2 { color: #b5eb7d; font-size: 28px; font-weight: 700; }
+        .card small { display: block; margin-top: 6px; color: #8aa396; font-size: 11px; }
+        .panel {
+            padding: 26px;
+            border-radius: 21px;
+            margin-bottom: 25px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.018));
+            border: 1px solid rgba(149, 213, 91, 0.12);
+            box-shadow: 0 18px 50px rgba(0, 0, 0, 0.20);
+        }
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .panel-header h2 { font-size: 20px; color: #eef7ed; }
+        .panel-header span { color: #9bb3a5; font-size: 12px; }
+        .table-scroll { overflow-x: auto; }
+        .accounts-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .accounts-table th {
+            text-align: left;
+            padding: 12px 14px;
+            color: #9bb4a5;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            border-bottom: 1px solid rgba(149, 213, 91, 0.14);
+        }
+        .accounts-table td {
+            padding: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: #e4efe8;
+            vertical-align: middle;
+        }
+        .accounts-table tr:last-child td { border-bottom: none; }
+        .user-cell { display: flex; align-items: center; gap: 11px; }
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #95d55b, #4c9a3d);
+            color: #061a12;
+            font-weight: 800;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .user-name { font-weight: 600; color: #f2f7f2; }
+        .user-email { font-size: 11px; color: #93ab9d; }
+        .badge-soft {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(149, 213, 91, 0.12);
+            border: 1px solid rgba(149, 213, 91, 0.22);
+            color: #b8ef82;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .activity-list { display: flex; flex-direction: column; gap: 10px; }
+        .activity-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 13px 16px;
+            border-radius: 14px;
+            background: rgba(3, 19, 12, 0.48);
+            border: 1px solid rgba(149, 213, 91, 0.09);
+        }
+        .activity-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .activity-text strong { color: #f2f7f2; font-size: 13px; }
+        .activity-text p { color: #9bb3a5; font-size: 12px; margin-top: 2px; }
+        .activity-time { color: #8aa396; font-size: 11px; white-space: nowrap; }
+        @media (max-width: 1100px) {
+            .cards { grid-template-columns: repeat(2, 1fr); }
+            .main { padding: 30px; }
+        }
+        @media (max-width: 760px) {
+            .main { margin-left: 75px; padding: 25px 18px 40px; }
+            .cards { grid-template-columns: 1fr 1fr; gap: 12px; }
+            .activity-row { flex-direction: column; align-items: flex-start; }
+        }
+        @media (max-width: 500px) {
+            .cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <aside class="sidebar">
+        <div class="brand">
+            <div class="brand-icon">🌿</div>
+            <div class="brand-text">
+                <h2>Nutri<span>AI</span></h2>
+                <small>SMART NUTRITION</small>
+            </div>
+        </div>
+
+        <nav class="navigation">
+            <a href="{{ url_for('dashboard') }}" class="nav-item">
+                <span>⌂</span>
+                <label>Dashboard</label>
+            </a>
+            <a href="{{ url_for('mealplanner') }}" class="nav-item">
+                <span>🍽</span>
+                <label>Meal Planner</label>
+            </a>
+            <a href="{{ url_for('nutrition') }}" class="nav-item">
+                <span>🥗</span>
+                <label>Nutrition</label>
+            </a>
+            <a href="{{ url_for('recipe') }}" class="nav-item">
+                <span>🤖</span>
+                <label>AI Recipes</label>
+            </a>
+            <a href="{{ url_for('grocery') }}" class="nav-item">
+                <span>🛒</span>
+                <label>Grocery</label>
+            </a>
+            <a href="{{ url_for('report') }}" class="nav-item">
+                <span>📊</span>
+                <label>My Report</label>
+            </a>
+<a href="{{ url_for('profile') }}" class="nav-item">
+                <span>👤</span>
+                <label>Profile</label>
+            </a>
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="mini-tip">
+                <div class="tip-icon">✨</div>
+                <div>
+                    <strong>Daily Tip</strong>
+                    <p>Stay hydrated and eat mindfully.</p>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout">
+                <span>↪</span>
+                <label>Logout</label>
+            </a>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <div>
+                <h1>👥 Accounts &amp; Usage</h1>
+                <p>See who created a NutriAI account and how people use the app.</p>
+            </div>
+            <div class="topbar-actions">
+                <form method="GET" action="{{ url_for('users_activity') }}" class="search-form">
+                    <input type="search" name="q" value="{{ query }}" placeholder="Search by name, email, diet..." aria-label="Filter accounts">
+                </form>
+                <a href="{{ url_for('profile') }}" class="profile-link-btn">👤 My Profile →</a>
+            </div>
+        </header>
+
+        <div class="cards">
+            <div class="card">
+                <h3>👤 Accounts Created</h3>
+                <h2>{{ total_accounts }}</h2>
+                <small>Registered NutriAI members</small>
+            </div>
+            <div class="card">
+                <h3>⚡ Active Today</h3>
+                <h2>{{ active_today }}</h2>
+                <small>Members active today</small>
+            </div>
+            <div class="card">
+                <h3>🔐 Total Logins</h3>
+                <h2>{{ total_logins }}</h2>
+                <small>Completed sign-ins</small>
+            </div>
+            <div class="card">
+                <h3>📈 App Actions</h3>
+                <h2>{{ total_actions }}</h2>
+                <small>Plans, analyses, recipes &amp; logs</small>
+            </div>
+        </div>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Registered Accounts</h2>
+                <span>{{ accounts|length }} account(s)</span>
+            </div>
+            <div class="table-scroll">
+                <table class="accounts-table">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Diet &amp; Goal</th>
+                            <th>Account Created</th>
+                            <th>Last Active</th>
+                            <th>Logins</th>
+                            <th>Actions</th>
+                            <th>Profile</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if accounts %}
+                            {% for account in accounts %}
+                            <tr>
+                                <td>
+                                    <div class="user-cell">
+                                        <div class="avatar">{{ (account.name or 'U')[0]|upper }}</div>
+                                        <div>
+                                            <div class="user-name">
+                                                {{ account.name }}
+                                                {% if account.id == user.id %}
+                                                    <span class="you-pill">You</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="user-email">{{ account.email }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge-soft">{{ account.diet or 'Flexible' }} · {{ account.goal or 'Health' }}</span>
+                                </td>
+                                <td>{{ account.createdAt[:16]|replace('T', ' ') if account.createdAt else 'Recently' }}</td>
+                                <td>{{ (account.lastActiveAt or account.lastLoginAt)[:16]|replace('T', ' ') if (account.lastActiveAt or account.lastLoginAt) else 'Never' }}</td>
+                                <td>{{ account.loginCount or 0 }}</td>
+                                <td>{{ account.actionsCount or 0 }}</td>
+                                <td>
+                                    <a href="{{ url_for('user_profile_detail', target_user_id=account.id) }}" class="profile-link-btn" style="height:32px;padding:0 12px;font-size:11px;">View Profile →</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="7" style="color: #9bb3a5; text-align: center;">No matching accounts found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>Recent App Activity</h2>
+                <span>Latest signups &amp; feature usage</span>
+            </div>
+            <div class="activity-list">
+                {% if recent_activity %}
+                    {% for item in recent_activity %}
+                    <div class="activity-row">
+                        <div class="activity-left">
+                            <span class="badge-soft">{{ item.eventType|replace('_', ' ')|title }}</span>
+                            <div class="activity-text">
+                                <strong>{{ item.userName }} ({{ item.userEmail }})</strong>
+                                <p>{{ item.details }}</p>
+                            </div>
+                        </div>
+                        <div class="activity-time">{{ item.createdAt[:16]|replace('T', ' ') if item.createdAt else '' }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p style="color: #9bb3a5; font-size: 13px;">No recorded activity yet.</p>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+</div>
+</body>
+
+</html>
